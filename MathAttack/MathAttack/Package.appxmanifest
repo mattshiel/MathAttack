@@ -14,7 +14,7 @@
   <mp:PhoneIdentity PhoneProductId="6f870712-3ad7-4bdf-92d7-da2f5051df73" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>SmokeFree</DisplayName>
+    <DisplayName>MathAttack</DisplayName>
     <PublisherDisplayName>mattshiel</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -30,12 +30,12 @@
   <Applications>
     <Application Id="App"
       Executable="$targetnametoken$.exe"
-      EntryPoint="SmokeFree.App">
+      EntryPoint="MathAttack.App">
       <uap:VisualElements
-        DisplayName="SmokeFree"
+        DisplayName="MathAttack"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
-        Description="SmokeFree"
+        Description="MathAttack"
         BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
