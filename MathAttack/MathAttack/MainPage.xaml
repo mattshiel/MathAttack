@@ -9,7 +9,7 @@
 
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <!-- Adapted from https://microsoft.github.io/Win2D/html/QuickStart.html-->
+        <!-- Adapted from https://microsoft.github.io/Win2D/html/QuickStart.htm-->
         <canvas:CanvasControl x:Name="GameCanvas" CreateResources ="GameCanvas_CreateResources" Draw="GameCanvas_Draw" IsTapEnabled="True"/>
     </Grid>
 
