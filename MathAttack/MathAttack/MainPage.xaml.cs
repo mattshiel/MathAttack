@@ -8,6 +8,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -25,8 +26,12 @@ namespace MathAttack
     /// </summary>
     public sealed partial class MainPage : Page
     {
-
         CanvasBitmap StartScreen;
+        Rect boundaries = ApplicationView.GetForCurrentView().VisibleBounds;
+        public float DesignWidth = 1920;
+        public float DesignHeight = 1080;
+        public float scaleWidth, scaleHeight;
+
         public MainPage()
         {
             this.InitializeComponent();
@@ -54,6 +59,12 @@ namespace MathAttack
 
             // Redraw everything in the draw method (roughly 60fps)
             GameCanvas.Invalidate();
+        }
+
+        // Handles touch screen taps
+        private void GameCanvas_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+
         }
     }
 }
