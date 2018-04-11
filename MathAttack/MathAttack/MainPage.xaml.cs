@@ -18,7 +18,8 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using MathAttack.Class;
-    
+using Windows.UI;
+
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace MathAttack
@@ -29,8 +30,8 @@ namespace MathAttack
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        // Game levels
-        public CanvasBitmap BG, StartScreen, Level1;
+        // Game level names
+        private CanvasBitmap BG, StartScreen, ScoreScreen, Level1;
 
         // Boundaries of the application view
         public static Rect boundaries = ApplicationView.GetForCurrentView().VisibleBounds;
@@ -40,7 +41,17 @@ namespace MathAttack
         public static float DesignHeight = 1080;
         public static float scaleWidth, scaleHeight;
 
-        public int GameState = 0; // Start screen
+        // Round Timer
+        private DispatcherTimer RoundTimer = new DispatcherTimer();
+
+        // Level of the game
+        private int GameState = 0;
+
+        // Timer starting value
+        private int countdown = 3;
+
+        // Controls when a round is over
+        private bool RoundEnded = false;
 
         public MainPage()
         {
@@ -49,6 +60,10 @@ namespace MathAttack
             Window.Current.SizeChanged += Current_SizeChanged;
             // Set the scale on page load
             Scaling.SetScale();
+
+            RoundTimer.Tick += RoundTimer_Tick;
+            RoundTimer.Interval = new TimeSpan(0, 0, 1);
+
         }
 
         private void Current_SizeChanged(object sender, WindowSizeChangedEventArgs e)
@@ -68,9 +83,13 @@ namespace MathAttack
         {
             // Loads the demo start screen
             StartScreen = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/Images/how-to-play.png"));
-            // 'await' suspends the calling method and yields control back to its caller until the awaited task is complete.
+
+            // Loads Level 1 screen
             Level1 = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/Images/AVP.jpg"));
-            
+
+            // Loads the score screen
+            ScoreScreen = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/Images/AVP.jpg"));
+
         }
 
         private void GameCanvas_Draw(Microsoft.Graphics.Canvas.UI.Xaml.CanvasControl sender, Microsoft.Graphics.Canvas.UI.Xaml.CanvasDrawEventArgs args)
@@ -79,6 +98,8 @@ namespace MathAttack
             GSM();
             // Draw the start screen
             args.DrawingSession.DrawImage(Scaling.ScaleImage(BG));
+            args.DrawingSession.DrawText(countdown.ToString(), 100, 100, Colors.Yellow);
+
 
             // Redraw everything in the draw method (roughly 60fps)
             GameCanvas.Invalidate();
@@ -87,27 +108,60 @@ namespace MathAttack
         // Handles touch screen taps
         private void GameCanvas_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            // If the screen is tapped/clicked go up one level
-            if(GameState == 0)
+            // Display the score screen if the round ends
+            if (RoundEnded == true)
             {
-                GameState += 1;
+                GameState = 0;
             }
+            else
+            {
+                // If the screen is tapped/clicked go up one level
+                if (GameState == 0)
+                {
+                    GameState += 1;
+                    RoundTimer.Start();
+                }
+            }
+           
         }
 
         // The Game State Manager
         public void GSM()
         {
-            // Start Screen
-            if (GameState == 0)
+            // Shows the score screen if the round ends
+            if (RoundEnded == true)
             {
-                BG = StartScreen;
+                BG = ScoreScreen;
             }
+            else
+            {
+                // Loads the Start Screen
+                if (GameState == 0)
+                {
+                    BG = StartScreen;
+                }
 
-            // Level 1
-            else if (GameState == 1)
-            {
-                BG = Level1;
+                // Loads Level 1
+                else if (GameState == 1)
+                {
+                    BG = Level1;
+                }
             }
-        }             
+            
+        }
+
+        // RoundTimer_Tick controls the decrementing round time
+        private void RoundTimer_Tick(object sender, object e)
+        {
+            // Decrement the timer
+            countdown -= 1;
+
+            // Stops the timer once it reaches 0 and ends the round
+            if (countdown < 1)
+            {
+                RoundTimer.Stop();
+                RoundEnded = true;
+            }
+        }
     }
 }
