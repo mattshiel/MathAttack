@@ -8,6 +8,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Core;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -16,10 +17,12 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-
+using MathAttack.Class;
+    
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace MathAttack
+
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
@@ -27,14 +30,24 @@ namespace MathAttack
     public sealed partial class MainPage : Page
     {
         CanvasBitmap StartScreen;
-        Rect boundaries = ApplicationView.GetForCurrentView().VisibleBounds;
-        public float DesignWidth = 1920;
-        public float DesignHeight = 1080;
-        public float scaleWidth, scaleHeight;
+        public static Rect boundaries = ApplicationView.GetForCurrentView().VisibleBounds;
+        public static float DesignWidth = 1920;
+        public static float DesignHeight = 1080;
+        public static float scaleWidth, scaleHeight;
 
         public MainPage()
         {
             this.InitializeComponent();
+            // Fires when the window has changed its rendering size
+            Window.Current.SizeChanged += Current_SizeChanged;
+            // Set the scale on page load
+            Scaling.SetScale();
+        }
+
+        private void Current_SizeChanged(object sender, WindowSizeChangedEventArgs e)
+        {
+            // Everytime the window size changes reset the scale
+            Scaling.SetScale();
         }
 
         // Adapted from https://microsoft.github.io/Win2D/html/T_Microsoft_Graphics_Canvas_UI_Xaml_CanvasControl.htm
@@ -55,7 +68,7 @@ namespace MathAttack
         private void GameCanvas_Draw(Microsoft.Graphics.Canvas.UI.Xaml.CanvasControl sender, Microsoft.Graphics.Canvas.UI.Xaml.CanvasDrawEventArgs args)
         {
             // Draw the start screen
-            args.DrawingSession.DrawImage(StartScreen);
+            args.DrawingSession.DrawImage(Scaling.ScaleImage(StartScreen));
 
             // Redraw everything in the draw method (roughly 60fps)
             GameCanvas.Invalidate();
