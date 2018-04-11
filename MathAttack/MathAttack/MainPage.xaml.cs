@@ -29,11 +29,18 @@ namespace MathAttack
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        CanvasBitmap StartScreen;
+        // Game levels
+        public CanvasBitmap BG, StartScreen, Level1;
+
+        // Boundaries of the application view
         public static Rect boundaries = ApplicationView.GetForCurrentView().VisibleBounds;
+
+        // Width and Height of canvas and scale width and height
         public static float DesignWidth = 1920;
         public static float DesignHeight = 1080;
         public static float scaleWidth, scaleHeight;
+
+        public int GameState = 0; // Start screen
 
         public MainPage()
         {
@@ -60,15 +67,18 @@ namespace MathAttack
         async Task CreateResourcesAsync(CanvasControl sender)
         {
             // Loads the demo start screen
-            // 'await' suspends the calling method and yields control back to its caller until the awaited task is complete.
             StartScreen = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/Images/how-to-play.png"));
+            // 'await' suspends the calling method and yields control back to its caller until the awaited task is complete.
+            Level1 = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/Images/AVP.jpg"));
             
         }
 
         private void GameCanvas_Draw(Microsoft.Graphics.Canvas.UI.Xaml.CanvasControl sender, Microsoft.Graphics.Canvas.UI.Xaml.CanvasDrawEventArgs args)
         {
+            // Load initial Game State
+            GSM();
             // Draw the start screen
-            args.DrawingSession.DrawImage(Scaling.ScaleImage(StartScreen));
+            args.DrawingSession.DrawImage(Scaling.ScaleImage(BG));
 
             // Redraw everything in the draw method (roughly 60fps)
             GameCanvas.Invalidate();
@@ -77,7 +87,27 @@ namespace MathAttack
         // Handles touch screen taps
         private void GameCanvas_Tapped(object sender, TappedRoutedEventArgs e)
         {
-
+            // If the screen is tapped/clicked go up one level
+            if(GameState == 0)
+            {
+                GameState += 1;
+            }
         }
+
+        // The Game State Manager
+        public void GSM()
+        {
+            // Start Screen
+            if (GameState == 0)
+            {
+                BG = StartScreen;
+            }
+
+            // Level 1
+            else if (GameState == 1)
+            {
+                BG = Level1;
+            }
+        }             
     }
 }
