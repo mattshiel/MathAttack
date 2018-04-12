@@ -110,7 +110,7 @@ namespace MathAttack
             //Display projectiles
             for (int i = 0; i < blastX.Count; i++)
             {
-                args.DrawingSession.DrawImage(Scaling.ScaleImage(Blast), blastX[i], blastY[i]);
+                args.DrawingSession.DrawImage(Scaling.ScaleImage(Blast), blastX[i] - (30 * scaleWidth), blastY[i] - (30 * scaleHeight)); // Decrease by 30 to compensate for the offset of the mouse
             }
 
             // Redraw everything in the draw method (roughly 60fps)
@@ -127,6 +127,7 @@ namespace MathAttack
                 GameState = 0;
                 // Reset the round
                 RoundEnded = false;
+                countdown = 6;
             }
             else
             {
@@ -136,10 +137,13 @@ namespace MathAttack
                     GameState += 1;
                     RoundTimer.Start();
 
+                   
+
+                } else if (GameState > 0)
+                {
                     // Add the xy coordinates of a blast projectile from user mouse position
                     blastX.Add((float)e.GetPosition(GameCanvas).X);
                     blastY.Add((float)e.GetPosition(GameCanvas).Y);
-
                 }
             }
            
