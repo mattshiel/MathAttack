@@ -112,6 +112,9 @@
     <Content Include="Assets\Images\AVP.jpg" />
     <Content Include="Assets\Images\blast.png" />
     <Content Include="Assets\Images\how-to-play.png" />
+    <Content Include="Assets\Images\minusmonster.png" />
+    <Content Include="Assets\Images\plusmonster.png" />
+    <Content Include="Assets\Images\weapon.png" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
