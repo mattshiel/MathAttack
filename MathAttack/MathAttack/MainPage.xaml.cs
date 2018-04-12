@@ -86,7 +86,7 @@ namespace MathAttack
 
 
             photonX = (float)boundaries.Width / 2;
-            photonY = (float)boundaries.Height - (150f * scaleHeight);
+            photonY = (float)boundaries.Height - (140f * scaleHeight);
 
             // Round Timer
             RoundTimer.Tick += RoundTimer_Tick;
@@ -108,7 +108,7 @@ namespace MathAttack
 
             // Adjust projectiles for scaling
             photonX = (float)boundaries.Width / 2;
-            photonY = (float)boundaries.Height - (150f * scaleHeight);
+            photonY = (float)boundaries.Height - (140f * scaleHeight);
     }
 
         // Adapted from https://microsoft.github.io/Win2D/html/T_Microsoft_Graphics_Canvas_UI_Xaml_CanvasControl.htm
