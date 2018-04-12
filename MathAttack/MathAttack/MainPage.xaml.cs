@@ -51,22 +51,34 @@ namespace MathAttack
         private DispatcherTimer EnemyTimer = new DispatcherTimer();
 
 
-        // List of projectiles positions
+        // List of projectiles image positions
         private List<float> blastXPos = new List<float>();
         private List<float> blastYPos = new List<float>();
         private List<float> percent = new List<float>();
 
-        // List of Enemies
+        // List for enemy image positions
         private List<float> enemyXpos = new List<float>();
         private List<float> enemyYpos = new List<float>();
+
+        // List  for enemy type
         private List<int> enemyType = new List<int>();
+
+        // List for enemy direction
+        private List<String> enemyDir = new List<String>();
+
+
+        // List for enemy start positions
+        private Random EnemyXStart = new Random(); // Enemy Type
+        private Random EnemyYStart = new Random(); // Enemy Type
+
+
 
         // Random Number Generators
         private Random EnemyTypeRand = new Random(); // Enemy Type
         private Random EnemyGenIntervalRand = new Random(); // Generation Interval
 
 
-
+         
         // Level of the game
         private int GameState = 0;
 
@@ -80,9 +92,9 @@ namespace MathAttack
         {
             this.InitializeComponent();
             // Fires when the window has changed its rendering size
-            Window.Current.SizeChanged += Current_SizeChanged;
             // Set the scale on page load
             Scaling.SetScale();
+            Window.Current.SizeChanged += Current_SizeChanged;
 
 
             photonX = (float)boundaries.Width / 2;
@@ -165,9 +177,23 @@ namespace MathAttack
                     if (enemyType[j] == 1) { ENEMY_IMG = MinusMonster; }
 
                     if (enemyType[j] == 2) { ENEMY_IMG = PlusMonster; }
-                    enemyXpos[j] += 3;
+
+                    // Change direction of enemy movement depending on how they spawn
+                    // Connected code can be seen in the enemyTimer function
+                    if (enemyDir[j].Equals("left"))
+                    {
+                        enemyXpos[j] -= 3;
+                    } else
+                    {
+                        enemyXpos[j] += 3;
+
+                    }
+
+                    // Move the enemies down, change value to change speed
+                    enemyYpos[j] += 3;
                     args.DrawingSession.DrawImage(Scaling.ScaleImage(ENEMY_IMG), enemyXpos[j], enemyYpos[j]);
                 }
+
                 //Draw projectiles
                 for (int i = 0; i < blastXPos.Count; i++)
                 {
@@ -215,6 +241,7 @@ namespace MathAttack
                 enemyXpos.Clear();
                 enemyYpos.Clear();
                 enemyType.Clear();
+                enemyDir.Clear();
 
             }
             else
@@ -282,13 +309,22 @@ namespace MathAttack
         {
             // Randomly choose what type of enemy to generate
             int eType = EnemyTypeRand.Next(1, 3);
+            int startPosX = EnemyXStart.Next(0, (int)boundaries.Width);  // Starting position for enemies on the x-axis
+            int startPosY = EnemyYStart.Next(450);
+            if (startPosX > boundaries.Width / 2)
+            {
+                enemyDir.Add("left");
+            } else
+            {
+                enemyDir.Add("right");
+            }
 
-            enemyXpos.Add(50 * scaleWidth);
-            enemyYpos.Add(110 * scaleHeight);
+            enemyXpos.Add(startPosX);
+            enemyYpos.Add(-50 * scaleHeight);
             enemyType.Add(eType);
 
             // Regenerate a random number so individual enemies spawn differently
-            EnemyTimer.Interval = new TimeSpan(0, 0, 0, 0, EnemyGenIntervalRand.Next(300, 3000));
+            EnemyTimer.Interval = new TimeSpan(0, 0, 0, 0, EnemyGenIntervalRand.Next(500, 2000));
         }
     }
 }
