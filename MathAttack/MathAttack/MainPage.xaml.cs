@@ -31,7 +31,7 @@ namespace MathAttack
     public sealed partial class MainPage : Page
     {
         // Game level names
-        private CanvasBitmap BG, StartScreen, ScoreScreen, Level1;
+        private CanvasBitmap BG, StartScreen, ScoreScreen, Level1, Blast;
 
         // Boundaries of the application view
         public static Rect boundaries = ApplicationView.GetForCurrentView().VisibleBounds;
@@ -43,6 +43,10 @@ namespace MathAttack
 
         // Round Timer
         private DispatcherTimer RoundTimer = new DispatcherTimer();
+
+        // List of projectiles positions
+        public List<float> blastX = new List<float>();
+        public List<float> blastY = new List<float>();
 
         // Level of the game
         private int GameState = 0;
@@ -88,7 +92,10 @@ namespace MathAttack
             Level1 = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/Images/AVP.jpg"));
 
             // Loads the score screen
-            ScoreScreen = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/Images/AVP.jpg"));
+            ScoreScreen = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/Images/ALwallpaper.png"));
+
+            // Loads a blast projectile
+            Blast = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/Images/blast.png"));
 
         }
 
@@ -100,6 +107,11 @@ namespace MathAttack
             args.DrawingSession.DrawImage(Scaling.ScaleImage(BG));
             args.DrawingSession.DrawText(countdown.ToString(), 100, 100, Colors.Yellow);
 
+            //Display projectiles
+            for (int i = 0; i < blastX.Count; i++)
+            {
+                args.DrawingSession.DrawImage(Scaling.ScaleImage(Blast), blastX[i], blastY[i]);
+            }
 
             // Redraw everything in the draw method (roughly 60fps)
             GameCanvas.Invalidate();
@@ -111,7 +123,10 @@ namespace MathAttack
             // Display the score screen if the round ends
             if (RoundEnded == true)
             {
+
                 GameState = 0;
+                // Reset the round
+                RoundEnded = false;
             }
             else
             {
@@ -120,6 +135,11 @@ namespace MathAttack
                 {
                     GameState += 1;
                     RoundTimer.Start();
+
+                    // Add the xy coordinates of a blast projectile from user mouse position
+                    blastX.Add((float)e.GetPosition(GameCanvas).X);
+                    blastY.Add((float)e.GetPosition(GameCanvas).Y);
+
                 }
             }
            
