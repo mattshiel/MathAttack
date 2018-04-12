@@ -34,25 +34,30 @@ namespace MathAttack
         private CanvasBitmap BG, StartScreen, ScoreScreen, Level1, Blast;
 
         // Boundaries of the application view
-        public static Rect boundaries = ApplicationView.GetForCurrentView().VisibleBounds;
+        public static Rect boundaries;
 
         // Width and Height of canvas and scale width and height
         public static float DesignWidth = 1920;
         public static float DesignHeight = 1080;
-        public static float scaleWidth, scaleHeight;
+        public static float scaleWidth, scaleHeight, pointX, pointY;
+        public float photonX;
+        public float photonY;
+
 
         // Round Timer
         private DispatcherTimer RoundTimer = new DispatcherTimer();
 
         // List of projectiles positions
-        public List<float> blastX = new List<float>();
-        public List<float> blastY = new List<float>();
+        public List<float> blastXPos = new List<float>();
+        public List<float> blastYPos = new List<float>();
+        public List<float> percent = new List<float>();
+
 
         // Level of the game
         private int GameState = 0;
 
         // Timer starting value
-        private int countdown = 3;
+        private int countdown = 10;
 
         // Controls when a round is over
         private bool RoundEnded = false;
@@ -65,6 +70,10 @@ namespace MathAttack
             // Set the scale on page load
             Scaling.SetScale();
 
+
+            photonX = (float)boundaries.Width / 2;
+            photonY = (float)boundaries.Height;
+
             RoundTimer.Tick += RoundTimer_Tick;
             RoundTimer.Interval = new TimeSpan(0, 0, 1);
 
@@ -72,9 +81,15 @@ namespace MathAttack
 
         private void Current_SizeChanged(object sender, WindowSizeChangedEventArgs e)
         {
+            boundaries = ApplicationView.GetForCurrentView().VisibleBounds;
+
             // Everytime the window size changes reset the scale
-            Scaling.SetScale();
-        }
+             Scaling.SetScale();
+
+            // Adjust projectiles for scaling
+            photonX = (float)boundaries.Width / 2;
+            photonY = (float)boundaries.Height;
+    }
 
         // Adapted from https://microsoft.github.io/Win2D/html/T_Microsoft_Graphics_Canvas_UI_Xaml_CanvasControl.htm
         private void GameCanvas_CreateResources(Microsoft.Graphics.Canvas.UI.Xaml.CanvasControl sender, Microsoft.Graphics.Canvas.UI.CanvasCreateResourcesEventArgs args)
@@ -108,9 +123,27 @@ namespace MathAttack
             args.DrawingSession.DrawText(countdown.ToString(), 100, 100, Colors.Yellow);
 
             //Display projectiles
-            for (int i = 0; i < blastX.Count; i++)
+            for (int i = 0; i < blastXPos.Count; i++)
             {
-                args.DrawingSession.DrawImage(Scaling.ScaleImage(Blast), blastX[i] - (30 * scaleWidth), blastY[i] - (30 * scaleHeight)); // Decrease by 30 to compensate for the offset of the mouse
+
+                // Linear Interpolation for moving the projectiles
+                // Adapted from https://stackoverflow.com/questions/25276516/linear-interpolation-for-dummies
+                pointX = (photonX + (blastXPos[i] - photonX) * percent[i]);
+                pointY = (photonY + (blastYPos[i] - photonY) * percent[i]);
+
+                args.DrawingSession.DrawImage(Scaling.ScaleImage(Blast), pointX - (30 * scaleWidth), pointY - (30 * scaleHeight)); // Decrease by 30 to compensate for the offset of the mouse
+
+                // Increment the position of the projectile to give the appearance of movement
+                percent[i] += (0.040f);
+
+                // If the projectile goes off the screen
+                if(pointY < 0f)
+                {
+                    // Remove any projectiles that go off the top of the screen
+                    blastXPos.RemoveAt(i);
+                    blastYPos.RemoveAt(i);
+                    percent.RemoveAt(i);
+                }
             }
 
             // Redraw everything in the draw method (roughly 60fps)
@@ -142,8 +175,9 @@ namespace MathAttack
                 } else if (GameState > 0)
                 {
                     // Add the xy coordinates of a blast projectile from user mouse position
-                    blastX.Add((float)e.GetPosition(GameCanvas).X);
-                    blastY.Add((float)e.GetPosition(GameCanvas).Y);
+                    blastXPos.Add((float)e.GetPosition(GameCanvas).X);
+                    blastYPos.Add((float)e.GetPosition(GameCanvas).Y);
+                    percent.Add(0f);
                 }
             }
            
