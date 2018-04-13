@@ -31,7 +31,7 @@ namespace MathAttack
     public sealed partial class MainPage : Page
     {
         // Game level resources
-        private CanvasBitmap BG, StartScreen, ScoreScreen, Level1, Blast, MinusMonster, PlusMonster, ENEMY_IMG, Weapon;
+        private CanvasBitmap BG, StartScreen, ScoreScreen, Level1, Blast, MinusMonster, PlusMonster, ENEMY_IMG, Weapon, Boom;
 
         // Boundaries of the application view
         public static Rect boundaries;
@@ -42,6 +42,14 @@ namespace MathAttack
         public static float scaleWidth, scaleHeight, pointX, pointY;
         private float photonX;
         private float photonY;
+
+        // Game Score
+        private float gameScore;
+
+        // Explosions
+        private float boomX, boomY;
+        // Value for how long the explosion image stays after an enemy dies
+        private int boomCount = 60; // Frames Per Second
 
 
         // Round Timer
@@ -130,6 +138,7 @@ namespace MathAttack
             args.TrackAsyncAction(CreateResourcesAsync(sender).AsAsyncAction());
         }
 
+        // Handles asynchronous loading of images
         async Task CreateResourcesAsync(CanvasControl sender)
         {
             // Loads the demo start screen
@@ -150,11 +159,15 @@ namespace MathAttack
             // Load the addition symbol monster
             PlusMonster = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/Images/plusmonster.png"));
 
-            //
+            // Load the weapon image
             Weapon = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/Images/weapon.png"));
+
+            // Load explosion
+            Boom = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/Images/boom.png"));
 
         }
 
+        // Handles all drawing of the game and its resources
         private void GameCanvas_Draw(Microsoft.Graphics.Canvas.UI.Xaml.CanvasControl sender, Microsoft.Graphics.Canvas.UI.Xaml.CanvasDrawEventArgs args)
         {
             // Load initial Game State
@@ -171,6 +184,18 @@ namespace MathAttack
                 // Draw the weapon first
                 args.DrawingSession.DrawImage(Scaling.ScaleImage(Weapon), (float)boundaries.Width / 2 - (50 * scaleWidth), (float)boundaries.Height - (150 * scaleHeight)); // Decrease by 30 to compensate for the offset of the mouse
 
+
+                // If the ship gets destroyed draw the explosion image
+                if(boomX > 0 && boomY > 0 && boomCount > 0)
+                {
+                    args.DrawingSession.DrawImage(Scaling.ScaleImage(Boom), boomX, boomY);
+                    boomCount -= 1;
+                } else // Otherwise don't explode
+                {
+                    boomCount = 60;
+                    boomX = 0;
+                    boomY = 0;
+                }
                 // Draw the enemies
                 for (int j = 0; j < enemyXpos.Count; j++)
                 {
@@ -207,6 +232,34 @@ namespace MathAttack
 
                     // Increment the position of the projectile to give the appearance of movement
                     percent[i] += (0.040f);
+
+                    // Check if the blast has hit an enemy (collision detection)
+                    for (int h = 0; h < enemyXpos.Count; h++)
+                    {
+                        // If the blast hits an enemy, adjusted for image size of boom.png (185 x 175)
+                        if(pointX >= enemyXpos[h] && pointX <= enemyXpos[h] + (185 * scaleWidth) 
+                            && pointY >= enemyYpos[h] && pointY <= enemyYpos[h] + (175 * scaleHeight))
+                        {
+                            boomX = pointX - ((185/2) * scaleWidth);
+                            boomY = pointY - ((175/2) * scaleWidth);
+
+                            // Remove the enemy image
+                            enemyXpos.RemoveAt(h);
+                            enemyYpos.RemoveAt(h);
+                            enemyType.RemoveAt(h);
+                            enemyDir.RemoveAt(h);
+
+                            // Remove the blast image
+                            blastXPos.RemoveAt(i);
+                            blastYPos.RemoveAt(i);
+                            percent.RemoveAt(i);
+
+                            // Increment Score
+                            gameScore = gameScore + 100;
+
+                            break;
+                        }
+                    }
 
                     // If the projectile goes off the screen
                     if (pointY < 0f)
@@ -310,7 +363,6 @@ namespace MathAttack
             // Randomly choose what type of enemy to generate
             int eType = EnemyTypeRand.Next(1, 3);
             int startPosX = EnemyXStart.Next(0, (int)boundaries.Width);  // Starting position for enemies on the x-axis
-            int startPosY = EnemyYStart.Next(450);
             if (startPosX > boundaries.Width / 2)
             {
                 enemyDir.Add("left");
@@ -319,8 +371,11 @@ namespace MathAttack
                 enemyDir.Add("right");
             }
 
+            // Where the enemies start on the x-axis
             enemyXpos.Add(startPosX);
+            // Where the enemies start on the y-axis
             enemyYpos.Add(-50 * scaleHeight);
+            // Assign the enemy type (1 or 2)
             enemyType.Add(eType);
 
             // Regenerate a random number so individual enemies spawn differently

@@ -111,6 +111,7 @@
     <Content Include="Assets\Images\ALwallpaper.png" />
     <Content Include="Assets\Images\AVP.jpg" />
     <Content Include="Assets\Images\blast.png" />
+    <Content Include="Assets\Images\boom.png" />
     <Content Include="Assets\Images\how-to-play.png" />
     <Content Include="Assets\Images\minusmonster.png" />
     <Content Include="Assets\Images\plusmonster.png" />
