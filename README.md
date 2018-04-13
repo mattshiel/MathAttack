@@ -55,6 +55,8 @@ Users with touchscreens will appreciate the support for the **inclinometre senso
 
 **Projectile speed** is dependent on where the user taps on the screen. Tapping closer to the weapon will cause a slow velocity, whereas tapping further away from the weapon will fire a **quick shot.**
 
+All fonts, backgrounds, resources and sprites were designed by me for an authentic feel.
+
 All of these features were considered in advance with the goal of furthering the interactivity of the app.
 
 ## Tests
