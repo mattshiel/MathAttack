@@ -108,7 +108,7 @@ namespace MathAttack
         private float GameState = 0;
 
         // Timer starting value
-        private int countdown = 10;
+        private int countdown = 60;
 
         // Controls when a round is over
         private bool RoundEnded = false;
