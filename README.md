@@ -49,6 +49,8 @@ The three main screens are the ***start screen***, ***gameplay screen*** and ***
 
 The game was designed with the different users in mind, that is why the app is completely **scalable**. Whether you're on a 40' device or a tablet, the game and its resources will scale accordingly.
 
+The game is **touch screen friendly**.
+
 Users with touchscreens will appreciate the support for the **inclinometre sensor**. Although it is only a 2D game and the ***roll and yaw*** mechanics are unneeded, I thought the ***pitch*** mechanic (swaying left and right) would be a good fit for the game's weapon, which user's can move on the bottom of the screen.
 
 **Projectile speed** is dependent on where the user taps on the screen. Tapping closer to the weapon will cause a slow velocity, whereas tapping further away from the weapon will fire a **quick shot.**
@@ -58,6 +60,23 @@ All of these features were considered in advance with the goal of furthering the
 ## Tests
 
 I tested this app with another computer running Windows 10 Anniversary Edition and Visual Studio 2017. The app scaled correctly on a larger 2k monitor and ran as designed.
+
+
+## The Game in Motion
+
+![Imgur](https://i.imgur.com/he0eA1b.gif)
+
+
+## References
+
+My guide while starting out it gave great direction on the different technologies:
+https://docs.microsoft.com/en-us/windows/uwp/gaming/e2e
+
+A good video series on Win2D that was useful while developing:
+https://www.youtube.com/watch?v=XrVvoay7afg
+
+A resource I utilised heavily for my inexperience with C#
+https://stackoverflow.com/
 
 ---
 
