@@ -108,13 +108,14 @@
     <None Include="MathAttack_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\Images\ALwallpaper.png" />
-    <Content Include="Assets\Images\AVP.jpg" />
     <Content Include="Assets\Images\blast.png" />
     <Content Include="Assets\Images\boom.png" />
     <Content Include="Assets\Images\how-to-play.png" />
+    <Content Include="Assets\Images\Level1.jpg" />
     <Content Include="Assets\Images\minusmonster.png" />
     <Content Include="Assets\Images\plusmonster.png" />
+    <Content Include="Assets\Images\score-screen.jpg" />
+    <Content Include="Assets\Images\start-screen.jpg" />
     <Content Include="Assets\Images\weapon.png" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />

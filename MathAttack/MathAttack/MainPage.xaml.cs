@@ -142,13 +142,13 @@ namespace MathAttack
         async Task CreateResourcesAsync(CanvasControl sender)
         {
             // Loads the demo start screen
-            StartScreen = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/Images/how-to-play.png"));
+            StartScreen = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/Images/start-screen.jpg"));
 
             // Loads Level 1 screen
-            Level1 = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/Images/AVP.jpg"));
+            Level1 = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/Images/Level1.jpg"));
 
             // Loads the score screen
-            ScoreScreen = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/Images/ALwallpaper.png"));
+            ScoreScreen = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/Images/score-screen.jpg"));
 
             // Loads a blast projectile
             Blast = await CanvasBitmap.LoadAsync(sender, new Uri("ms-appx:///Assets/Images/blast.png"));
