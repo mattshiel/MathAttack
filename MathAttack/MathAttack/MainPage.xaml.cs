@@ -19,6 +19,7 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using MathAttack.Class;
 using Windows.UI;
+using Microsoft.Graphics.Canvas.Text;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -80,6 +81,12 @@ namespace MathAttack
         private Random EnemyYStart = new Random(); // Enemy Type
 
 
+        // FONT
+        public static CanvasTextFormat textFormat = new CanvasTextFormat()
+        {
+            FontSize = 60,
+            WordWrapping = CanvasWordWrapping.NoWrap // Mostly never used but handy if paragraphs are used in the future
+        };
 
         // Random Number Generators
         private Random EnemyTypeRand = new Random(); // Enemy Type
@@ -177,100 +184,114 @@ namespace MathAttack
             args.DrawingSession.DrawImage(Scaling.ScaleImage(BG));
             args.DrawingSession.DrawText(countdown.ToString(), 100, 100, Colors.Yellow);
 
-            // Only draw enemies, weapons and projectiles if the start screen has been passed
-            if(GameState > 0)
+            // Check if the round has ended, otherwise contine to draw level
+            if (RoundEnded == true)
             {
-
-                // Draw the weapon first
-                args.DrawingSession.DrawImage(Scaling.ScaleImage(Weapon), (float)boundaries.Width / 2 - (50 * scaleWidth), (float)boundaries.Height - (150 * scaleHeight)); // Decrease by 30 to compensate for the offset of the mouse
-
-
-                // If the ship gets destroyed draw the explosion image
-                if(boomX > 0 && boomY > 0 && boomCount > 0)
+                // Set the parametres for the final score to be displayed
+                // Use a textLayout as opposed to just hard coding it in
+                // Used this as a reference to help with font scaling https://stackoverflow.com/questions/30696838/how-to-calculate-the-size-of-a-piece-of-text-in-win2d
+                CanvasTextLayout textLayout1 = new CanvasTextLayout(args.DrawingSession, gameScore.ToString(), textFormat, 0.0f, 0.0f);
+                args.DrawingSession.DrawTextLayout(textLayout1, ((DesignWidth * scaleWidth) / 2) - ((float)textLayout1.DrawBounds.Width / 2), 650 * scaleHeight, Colors.White);
+            } else
+            {
+                // Only draw enemies, weapons and projectiles if the start screen has been passed
+                if (GameState > 0)
                 {
-                    args.DrawingSession.DrawImage(Scaling.ScaleImage(Boom), boomX, boomY);
-                    boomCount -= 1;
-                } else // Otherwise don't explode
-                {
-                    boomCount = 60;
-                    boomX = 0;
-                    boomY = 0;
-                }
-                // Draw the enemies
-                for (int j = 0; j < enemyXpos.Count; j++)
-                {
-                    if (enemyType[j] == 1) { ENEMY_IMG = MinusMonster; }
 
-                    if (enemyType[j] == 2) { ENEMY_IMG = PlusMonster; }
+                    // Draw the weapon first
+                    args.DrawingSession.DrawImage(Scaling.ScaleImage(Weapon), (float)boundaries.Width / 2 - (50 * scaleWidth), (float)boundaries.Height - (150 * scaleHeight)); // Decrease by 30 to compensate for the offset of the mouse
 
-                    // Change direction of enemy movement depending on how they spawn
-                    // Connected code can be seen in the enemyTimer function
-                    if (enemyDir[j].Equals("left"))
+
+                    // If the ship gets destroyed draw the explosion image
+                    if (boomX > 0 && boomY > 0 && boomCount > 0)
                     {
-                        enemyXpos[j] -= 3;
-                    } else
+                        args.DrawingSession.DrawImage(Scaling.ScaleImage(Boom), boomX, boomY);
+                        boomCount -= 1;
+                    }
+                    else // Otherwise don't explode
                     {
-                        enemyXpos[j] += 3;
+                        boomCount = 60;
+                        boomX = 0;
+                        boomY = 0;
+                    }
+                    // Draw the enemies
+                    for (int j = 0; j < enemyXpos.Count; j++)
+                    {
+                        if (enemyType[j] == 1) { ENEMY_IMG = MinusMonster; }
 
+                        if (enemyType[j] == 2) { ENEMY_IMG = PlusMonster; }
+
+                        // Change direction of enemy movement depending on how they spawn
+                        // Connected code can be seen in the enemyTimer function
+                        if (enemyDir[j].Equals("left"))
+                        {
+                            enemyXpos[j] -= 3;
+                        }
+                        else
+                        {
+                            enemyXpos[j] += 3;
+
+                        }
+
+                        // Move the enemies down, change value to change speed
+                        enemyYpos[j] += 3;
+                        args.DrawingSession.DrawImage(Scaling.ScaleImage(ENEMY_IMG), enemyXpos[j], enemyYpos[j]);
                     }
 
-                    // Move the enemies down, change value to change speed
-                    enemyYpos[j] += 3;
-                    args.DrawingSession.DrawImage(Scaling.ScaleImage(ENEMY_IMG), enemyXpos[j], enemyYpos[j]);
-                }
-
-                //Draw projectiles
-                for (int i = 0; i < blastXPos.Count; i++)
-                {
-
-                    // Linear Interpolation for moving the projectiles
-                    // Adapted from https://stackoverflow.com/questions/25276516/linear-interpolation-for-dummies
-                    pointX = (photonX + (blastXPos[i] - photonX) * percent[i]);
-                    pointY = (photonY + (blastYPos[i] - photonY) * percent[i]);
-
-                    args.DrawingSession.DrawImage(Scaling.ScaleImage(Blast), pointX - (30 * scaleWidth), pointY - (30 * scaleHeight)); // Decrease by 30 to compensate for the offset of the mouse
-
-                    // Increment the position of the projectile to give the appearance of movement
-                    percent[i] += (0.040f);
-
-                    // Check if the blast has hit an enemy (collision detection)
-                    for (int h = 0; h < enemyXpos.Count; h++)
+                    //Draw projectiles
+                    for (int i = 0; i < blastXPos.Count; i++)
                     {
-                        // If the blast hits an enemy, adjusted for image size of boom.png (185 x 175)
-                        if(pointX >= enemyXpos[h] && pointX <= enemyXpos[h] + (185 * scaleWidth) 
-                            && pointY >= enemyYpos[h] && pointY <= enemyYpos[h] + (175 * scaleHeight))
+
+                        // Linear Interpolation for moving the projectiles
+                        // Adapted from https://stackoverflow.com/questions/25276516/linear-interpolation-for-dummies
+                        pointX = (photonX + (blastXPos[i] - photonX) * percent[i]);
+                        pointY = (photonY + (blastYPos[i] - photonY) * percent[i]);
+
+                        args.DrawingSession.DrawImage(Scaling.ScaleImage(Blast), pointX - (30 * scaleWidth), pointY - (30 * scaleHeight)); // Decrease by 30 to compensate for the offset of the mouse
+
+                        // Increment the position of the projectile to give the appearance of movement
+                        percent[i] += (0.040f);
+
+                        // Check if the blast has hit an enemy (collision detection)
+                        for (int h = 0; h < enemyXpos.Count; h++)
                         {
-                            boomX = pointX - ((185/2) * scaleWidth);
-                            boomY = pointY - ((175/2) * scaleWidth);
+                            // If the blast hits an enemy, adjusted for image size of boom.png (185 x 175)
+                            if (pointX >= enemyXpos[h] && pointX <= enemyXpos[h] + (185 * scaleWidth)
+                                && pointY >= enemyYpos[h] && pointY <= enemyYpos[h] + (175 * scaleHeight))
+                            {
+                                boomX = pointX - ((185 / 2) * scaleWidth);
+                                boomY = pointY - ((175 / 2) * scaleWidth);
 
-                            // Remove the enemy image
-                            enemyXpos.RemoveAt(h);
-                            enemyYpos.RemoveAt(h);
-                            enemyType.RemoveAt(h);
-                            enemyDir.RemoveAt(h);
+                                // Remove the enemy image
+                                enemyXpos.RemoveAt(h);
+                                enemyYpos.RemoveAt(h);
+                                enemyType.RemoveAt(h);
+                                enemyDir.RemoveAt(h);
 
-                            // Remove the blast image
+                                // Remove the blast image
+                                blastXPos.RemoveAt(i);
+                                blastYPos.RemoveAt(i);
+                                percent.RemoveAt(i);
+
+                                // Increment Score
+                                gameScore = gameScore + 100;
+
+                                break;
+                            }
+                        }
+
+                        // If the projectile goes off the screen
+                        if (pointY < 0f)
+                        {
+                            // Remove any projectiles that go off the top of the screen
                             blastXPos.RemoveAt(i);
                             blastYPos.RemoveAt(i);
                             percent.RemoveAt(i);
-
-                            // Increment Score
-                            gameScore = gameScore + 100;
-
-                            break;
                         }
-                    }
-
-                    // If the projectile goes off the screen
-                    if (pointY < 0f)
-                    {
-                        // Remove any projectiles that go off the top of the screen
-                        blastXPos.RemoveAt(i);
-                        blastYPos.RemoveAt(i);
-                        percent.RemoveAt(i);
                     }
                 }
             }
+         
             
 
             // Redraw everything in the draw method (roughly 60fps)
