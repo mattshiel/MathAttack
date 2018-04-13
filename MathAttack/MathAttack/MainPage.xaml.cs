@@ -20,6 +20,8 @@ using Windows.UI.Xaml.Navigation;
 using MathAttack.Class;
 using Windows.UI;
 using Microsoft.Graphics.Canvas.Text;
+using Windows.Storage;
+using System.Numerics;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -45,7 +47,7 @@ namespace MathAttack
         private float photonY;
 
         // Game Score
-        private float gameScore;
+        public static float gameScore;
 
         // Explosions
         private float boomX, boomY;
@@ -92,16 +94,20 @@ namespace MathAttack
         private Random EnemyTypeRand = new Random(); // Enemy Type
         private Random EnemyGenIntervalRand = new Random(); // Generation Interval
 
-
-         
         // Level of the game
-        private int GameState = 0;
+        private float GameState = 0;
 
         // Timer starting value
         private int countdown = 10;
 
         // Controls when a round is over
         private bool RoundEnded = false;
+
+        // High Score variable for storing
+
+        public static int HighScore = 0;
+        public static string STRHighScore;
+
 
         public MainPage()
         {
@@ -124,6 +130,11 @@ namespace MathAttack
             // Controls intervals that spawn enemies
             EnemyTimer.Interval = new TimeSpan(0, 0, 0, 0, EnemyGenIntervalRand.Next(300, 3000));
 
+            // Create a file to store the player's high score
+            Storage.CreateFile();
+
+            // Load the file
+            Storage.ReadFile();
         }
 
         private void Current_SizeChanged(object sender, WindowSizeChangedEventArgs e)
@@ -184,15 +195,29 @@ namespace MathAttack
             args.DrawingSession.DrawImage(Scaling.ScaleImage(BG));
             args.DrawingSession.DrawText(countdown.ToString(), 100, 100, Colors.Yellow);
 
+            HighScore = int.Parse(STRHighScore);
+            HighScore = Convert.ToInt32(STRHighScore);
+
             // Check if the round has ended, otherwise contine to draw level
             if (RoundEnded == true)
             {
-                // Set the parametres for the final score to be displayed
+                
+                if(gameScore > Convert.ToInt16(STRHighScore))
+                {
+                    Storage.UpdateScore();
+
+                }
+
+                // Set the parametres for the final score to be drawn
                 // Use a textLayout as opposed to just hard coding it in
                 // Used this as a reference to help with font scaling https://stackoverflow.com/questions/30696838/how-to-calculate-the-size-of-a-piece-of-text-in-win2d
                 CanvasTextLayout textLayout1 = new CanvasTextLayout(args.DrawingSession, gameScore.ToString(), textFormat, 0.0f, 0.0f);
                 args.DrawingSession.DrawTextLayout(textLayout1, ((DesignWidth * scaleWidth) / 2) - ((float)textLayout1.DrawBounds.Width / 2), 650 * scaleHeight, Colors.White);
-            } else
+                args.DrawingSession.DrawText("HighScore: " + Convert.ToInt16(STRHighScore), new System.Numerics.Vector2(200, 200), Color.FromArgb(200, 215, 200, 180));
+
+
+            }
+            else
             {
                 // Only draw enemies, weapons and projectiles if the start screen has been passed
                 if (GameState > 0)
