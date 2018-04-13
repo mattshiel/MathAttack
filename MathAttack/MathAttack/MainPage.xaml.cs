@@ -137,6 +137,7 @@ namespace MathAttack
             // Weapon Positions
             WeaponPosX = (float)boundaries.Width / 2 - (50 * scaleWidth);
             WeaponPosY = (float)boundaries.Height - (150 * scaleHeight); 
+
             // To Implement the inclinometre I followed this guide from Microsoft https://docs.microsoft.com/en-us/windows/uwp/devices-sensors/use-the-inclinometer
             // Grab the default inclinometre
             inclinometer = Inclinometer.GetDefault();
@@ -152,6 +153,7 @@ namespace MathAttack
             }
         }
 
+        // Uncomment for Inclinometre 
         // Create the change event
         private async void ReadingChanged(Inclinometer sender, InclinometerReadingChangedEventArgs e)
         {
@@ -187,7 +189,10 @@ namespace MathAttack
             // Adjust projectiles for scaling
             photonX = (float)boundaries.Width / 2;
             photonY = (float)boundaries.Height - (140f * scaleHeight);
-    }
+
+            WeaponPosX = (float)boundaries.Width / 2 - (50 * scaleWidth);
+            WeaponPosY = (float)boundaries.Height - (150 * scaleHeight);
+        }
 
         // Adapted from https://microsoft.github.io/Win2D/html/T_Microsoft_Graphics_Canvas_UI_Xaml_CanvasControl.htm
         private void GameCanvas_CreateResources(Microsoft.Graphics.Canvas.UI.Xaml.CanvasControl sender, Microsoft.Graphics.Canvas.UI.CanvasCreateResourcesEventArgs args)
@@ -299,8 +304,8 @@ namespace MathAttack
                         // Linear Interpolation for moving the projectiles
                         // Adapted from https://stackoverflow.com/questions/25276516/linear-interpolation-for-dummies
                         // THIS CODE IS FOR MOBILE ONLY OR DEVICES WITH AN ACCELEROMETRE
-                        pointX = (blastXPos[i] + (blastXPos[i] - blastXPos[i]) * percent[i]);
-                        pointY = (blastYPos[i] + (blastYPos[i] - blastYPos[i]) * percent[i]);
+                         pointX = (blastXPos[i] + (blastXPos[i] - blastXPos[i]) * percent[i]);
+                         pointY = (blastYPos[i] + (blastYPos[i] - blastYPos[i]) * percent[i]);
 
                         // THIS CODE ALLOWS FOR DESKTOPS, LAPTOPS ETC. TO SEE THE BLASTS MOVE
                         pointX = (photonX + (blastXPos[i] - photonX) * percent[i]);
