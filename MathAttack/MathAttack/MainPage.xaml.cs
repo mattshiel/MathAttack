@@ -22,6 +22,7 @@ using Windows.UI;
 using Microsoft.Graphics.Canvas.Text;
 using Windows.Storage;
 using System.Numerics;
+using Windows.Devices.Sensors;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -65,6 +66,8 @@ namespace MathAttack
         // List of projectiles image positions
         private List<float> blastXPos = new List<float>();
         private List<float> blastYPos = new List<float>();
+        private List<float> blastXPosStartPos = new List<float>();
+        private List<float> blastYPosStartPos = new List<float>();
         private List<float> percent = new List<float>();
 
         // List for enemy image positions
@@ -82,6 +85,13 @@ namespace MathAttack
         private Random EnemyXStart = new Random(); // Enemy Type
         private Random EnemyYStart = new Random(); // Enemy Type
 
+        // Weapon Position
+        public float WeaponPosX;
+        public float WeaponPosY;
+
+        // Inclinometer
+        private Inclinometer inclinometer;
+        float roll, pitch, yaw;
 
         // FONT
         public static CanvasTextFormat textFormat = new CanvasTextFormat()
@@ -103,12 +113,6 @@ namespace MathAttack
         // Controls when a round is over
         private bool RoundEnded = false;
 
-        // High Score variable for storing
-
-        public static int HighScore = 0;
-        public static string STRHighScore;
-
-
         public MainPage()
         {
             this.InitializeComponent();
@@ -128,13 +132,49 @@ namespace MathAttack
             // Enemy Timer
             EnemyTimer.Tick += EnemyTimer_Tick;
             // Controls intervals that spawn enemies
-            EnemyTimer.Interval = new TimeSpan(0, 0, 0, 0, EnemyGenIntervalRand.Next(300, 3000));
+            EnemyTimer.Interval = new TimeSpan(0, 0, 0, 0, EnemyGenIntervalRand.Next(300, 2000));
 
-            // Create a file to store the player's high score
-            Storage.CreateFile();
+            // Weapon Positions
+            WeaponPosX = (float)boundaries.Width / 2 - (50 * scaleWidth);
+            WeaponPosY = (float)boundaries.Height - (150 * scaleHeight); 
+            // To Implement the inclinometre I followed this guide from Microsoft https://docs.microsoft.com/en-us/windows/uwp/devices-sensors/use-the-inclinometer
+            // Grab the default inclinometre
+            inclinometer = Inclinometer.GetDefault();
 
-            // Load the file
-            Storage.ReadFile();
+            if(inclinometer != null)
+            {
+                // Establish the report interval for all scenarios
+                uint minReportInterval = inclinometer.MinimumReportInterval;
+                uint reportInterval = minReportInterval > 16 ? minReportInterval : 16;
+
+                //Establish the event handler
+                inclinometer.ReadingChanged += new TypedEventHandler<Inclinometer, InclinometerReadingChangedEventArgs>(ReadingChanged);
+            }
+        }
+
+        // Create the change event
+        private async void ReadingChanged(Inclinometer sender, InclinometerReadingChangedEventArgs e)
+        {
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                InclinometerReading reading = e.Reading;
+
+                roll = reading.RollDegrees;
+                pitch = reading.PitchDegrees;
+                yaw = reading.YawDegrees;
+
+                // Move right
+                if(pitch > 0 && WeaponPosX < 1100 * scaleWidth)
+                {
+                    WeaponPosX = WeaponPosX + pitch;
+                }
+                // Else move left
+                else if (pitch < 0 && WeaponPosX > 100 * scaleWidth)
+                {
+                    WeaponPosX = WeaponPosX + pitch;
+                }
+                
+            });
         }
 
         private void Current_SizeChanged(object sender, WindowSizeChangedEventArgs e)
@@ -195,26 +235,15 @@ namespace MathAttack
             args.DrawingSession.DrawImage(Scaling.ScaleImage(BG));
             args.DrawingSession.DrawText(countdown.ToString(), 100, 100, Colors.Yellow);
 
-            HighScore = int.Parse(STRHighScore);
-            HighScore = Convert.ToInt32(STRHighScore);
-
             // Check if the round has ended, otherwise contine to draw level
             if (RoundEnded == true)
             {
-                
-                if(gameScore > Convert.ToInt16(STRHighScore))
-                {
-                    Storage.UpdateScore();
-
-                }
 
                 // Set the parametres for the final score to be drawn
                 // Use a textLayout as opposed to just hard coding it in
                 // Used this as a reference to help with font scaling https://stackoverflow.com/questions/30696838/how-to-calculate-the-size-of-a-piece-of-text-in-win2d
                 CanvasTextLayout textLayout1 = new CanvasTextLayout(args.DrawingSession, gameScore.ToString(), textFormat, 0.0f, 0.0f);
                 args.DrawingSession.DrawTextLayout(textLayout1, ((DesignWidth * scaleWidth) / 2) - ((float)textLayout1.DrawBounds.Width / 2), 650 * scaleHeight, Colors.White);
-                args.DrawingSession.DrawText("HighScore: " + Convert.ToInt16(STRHighScore), new System.Numerics.Vector2(200, 200), Color.FromArgb(200, 215, 200, 180));
-
 
             }
             else
@@ -224,7 +253,7 @@ namespace MathAttack
                 {
 
                     // Draw the weapon first
-                    args.DrawingSession.DrawImage(Scaling.ScaleImage(Weapon), (float)boundaries.Width / 2 - (50 * scaleWidth), (float)boundaries.Height - (150 * scaleHeight)); // Decrease by 30 to compensate for the offset of the mouse
+                    args.DrawingSession.DrawImage(Scaling.ScaleImage(Weapon), WeaponPosX, WeaponPosY); 
 
 
                     // If the ship gets destroyed draw the explosion image
@@ -269,6 +298,11 @@ namespace MathAttack
 
                         // Linear Interpolation for moving the projectiles
                         // Adapted from https://stackoverflow.com/questions/25276516/linear-interpolation-for-dummies
+                        // THIS CODE IS FOR MOBILE ONLY OR DEVICES WITH AN ACCELEROMETRE
+                        pointX = (blastXPos[i] + (blastXPos[i] - blastXPos[i]) * percent[i]);
+                        pointY = (blastYPos[i] + (blastYPos[i] - blastYPos[i]) * percent[i]);
+
+                        // THIS CODE ALLOWS FOR DESKTOPS, LAPTOPS ETC. TO SEE THE BLASTS MOVE
                         pointX = (photonX + (blastXPos[i] - photonX) * percent[i]);
                         pointY = (photonY + (blastYPos[i] - photonY) * percent[i]);
 
@@ -296,6 +330,8 @@ namespace MathAttack
                                 // Remove the blast image
                                 blastXPos.RemoveAt(i);
                                 blastYPos.RemoveAt(i);
+                                blastXPosStartPos.RemoveAt(i);
+                                blastYPosStartPos.RemoveAt(i);
                                 percent.RemoveAt(i);
 
                                 // Increment Score
@@ -311,6 +347,8 @@ namespace MathAttack
                             // Remove any projectiles that go off the top of the screen
                             blastXPos.RemoveAt(i);
                             blastYPos.RemoveAt(i);
+                            blastXPosStartPos.RemoveAt(i);
+                            blastYPosStartPos.RemoveAt(i);
                             percent.RemoveAt(i);
                         }
                     }
@@ -358,6 +396,8 @@ namespace MathAttack
                     // Add the xy coordinates of a blast projectile from user mouse position
                     blastXPos.Add((float)e.GetPosition(GameCanvas).X);
                     blastYPos.Add((float)e.GetPosition(GameCanvas).Y);
+                    blastXPosStartPos.Add((float)(WeaponPosX + (Weapon.Bounds.Width*scaleWidth / 2)));
+                    blastYPosStartPos.Add((float)boundaries.Height - (65 * scaleHeight));
                     percent.Add(0f);
                 }
             }
