@@ -1,17 +1,20 @@
 # The Math Attack
 
-Blast aliens away in this fun math-themed shooter for Windows devices!
+Blast aliens away in this fun math-themed shooter for the Universal Windows Platform!
 
 [![](https://i.imgur.com/9Dai8JV.png)]()
 
-The Math Attack is a take on classic overhead shooters! Developed for Windows Devices.
+The Math Attack is a take on classic overhead shooters! 
 
+It is a Universal Windows App designed for use with all Windows devices except for the XBox.
+
+---
 
 ## Prerequisites
 
-**You must have a computer with a minimum of Visual Studio 2017 installed**
+**You must have a computer with a minimum of Visual Studio 2017 installed.**
 
-**If you have a Mac you will need Paralells or a hardware virtualizer of your choice to run Visual Studio 20xx**
+**If you have a Mac you will need Parallels or a hardware virtualizer of your choice to run Visual Studio 20xx.**
 
 ## Installation
 
@@ -33,15 +36,28 @@ This game references the NuGet packages Win2D.uwp or Win2D.win81, which will be 
 
 ---
 
+## Technologies Used
+
+The Math Attack was built using Win2D, a Windows Runtime API for immediate mode 2D graphics and GPU acceleration.
+
+I chose Win2D as I wanted to develop a 2D UWP game and had no experience in using C#. Having previously developed games with HTML5 Canvas and Javascript, Win2D was an attractive choice. It too integrated a canvas-like control that integrated with XAML seamlessly.
+
 ## Features
 
-The Math Attack was 
-## Usage
-## Documentation
+The Math Attack is a **multi-page app** that provides an **intuitive UI** and great gaming experience.
+The three main screens are the ***start screen***, ***gameplay screen*** and ***score screen.***
+
+The game was designed with the different users in mind, that is why the app is completely **scalable**. Whether you're on a 40' device or a tablet, the game and its resources will scale accordingly.
+
+Users with touchscreens will appreciate the support for the **inclinometre sensor**. Although it is only a 2D game and the ***roll and yaw*** mechanics are unneeded, I thought the ***pitch*** mechanic (swaying left and right) would be a good fit for the game's weapon, which user's can move on the bottom of the screen.
+
+**Projectile speed** is dependent on where the user taps on the screen. Tapping closer to the weapon will cause a slow velocity, whereas tapping further away from the weapon will fire a **quick shot.**
+
+All of these features were considered in advance with the goal of furthering the interactivity of the app.
+
 ## Tests
 
-- Going into more detail on code and technologies used
-- I utilized this nifty <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">Markdown Cheatsheet</a> for this sample `README`.
+I tested this app with another computer running Windows 10 Anniversary Edition and Visual Studio 2017. The app scaled correctly on a larger 2k monitor and ran as designed.
 
 ---
 
